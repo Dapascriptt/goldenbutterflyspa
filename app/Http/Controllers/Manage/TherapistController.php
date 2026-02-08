@@ -40,7 +40,26 @@ class TherapistController extends Controller
 
     public function summary()
     {
-        return view('manage.therapist.summary');
+        $month = (int) request('month', now()->month);
+        $year = (int) request('year', now()->year);
+
+        $rows = TherapistCharge::query()
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get();
+
+        $totalExtraTime = (int) $rows->sum('extra_time');
+        $totalCustomers = $rows->count();
+
+        return view('manage.therapist.summary', [
+            'rows' => $rows,
+            'month' => $month,
+            'year' => $year,
+            'totalExtraTime' => $totalExtraTime,
+            'totalCustomers' => $totalCustomers,
+        ]);
     }
 
     public function create()
@@ -87,6 +106,15 @@ class TherapistController extends Controller
 
         $date = Carbon::parse($record->date);
 
+        if ($request->input('redirect') === 'summary') {
+            return redirect()
+                ->route('manage.therapist.summary', [
+                    'year' => $date->year,
+                    'month' => $date->month,
+                ])
+                ->with('status', 'Therapist tersimpan.');
+        }
+
         return redirect()
             ->route('manage.therapist.index', [
                 'year' => $date->year,
@@ -103,11 +131,60 @@ class TherapistController extends Controller
 
     public function update(TherapistUpdateRequest $request, int $id)
     {
-        $request->validated();
+        $data = $request->validated();
+
+        $record = TherapistCharge::findOrFail($id);
+
+        $extraTime = (int) ($data['extra_time'] ?? 0);
+        $traditional = (int) ($data['traditional'] ?? 0);
+        $fullbody = (int) ($data['fullbody'] ?? 0);
+        $butterfly = (int) ($data['butterfly'] ?? 0);
+        $shockwave = (bool) ($data['shockwave'] ?? false);
+        $discountPercent = (int) ($data['discount_percent'] ?? 0);
+        $discountNominal = (int) ($data['discount_nominal'] ?? 0);
+        $roomCharge = (int) ($data['room_charge'] ?? 0);
+
+        $extraCharge = $extraTime * 150000;
+        $packageCharge = ($traditional * 400000) + ($fullbody * 550000) + ($butterfly * 700000);
+        $addOnCharge = $shockwave ? 250000 : 0;
+        $subtotal = $extraCharge + $packageCharge + $addOnCharge + $roomCharge;
+        $discountValue = (int) round($subtotal * ($discountPercent / 100));
+        $total = max($subtotal - $discountValue - $discountNominal, 0);
+
+        $record->update([
+            'date' => $data['tanggal'],
+            'time' => $data['waktu'] ?? null,
+            'therapist_name' => $data['nama'],
+            'extra_time' => $extraTime,
+            'extra_charge' => $extraCharge,
+            'traditional' => $traditional,
+            'fullbody' => $fullbody,
+            'butterfly' => $butterfly,
+            'shockwave' => $shockwave,
+            'discount_percent' => $discountPercent,
+            'discount_nominal' => $discountNominal,
+            'room_charge' => $roomCharge,
+            'total_charge' => $total,
+            'room' => $data['room'] ?? null,
+        ]);
+
+        $date = Carbon::parse($record->date);
+        if ($request->input('redirect') === 'summary') {
+            return redirect()
+                ->route('manage.therapist.summary', [
+                    'year' => $date->year,
+                    'month' => $date->month,
+                ])
+                ->with('status', 'Therapist diperbarui.');
+        }
 
         return redirect()
-            ->route('manage.therapist.index')
-            ->with('status', 'Therapist diperbarui (dummy).');
+            ->route('manage.therapist.index', [
+                'year' => $date->year,
+                'month' => $date->month,
+                'date' => $date->toDateString(),
+            ])
+            ->with('status', 'Therapist diperbarui.');
     }
 
     public function destroy(int $id)
@@ -115,7 +192,7 @@ class TherapistController extends Controller
         TherapistCharge::whereKey($id)->delete();
 
         return redirect()
-            ->route('manage.therapist.index')
+            ->back()
             ->with('status', 'Therapist dihapus.');
     }
 

@@ -13,6 +13,19 @@ class TherapistStoreRequest extends FormRequest
 
     public function rules(): array
     {
+        if ($this->input('redirect') === 'summary') {
+            return [
+                'redirect' => ['nullable', 'string'],
+                'tanggal' => ['required', 'date'],
+                'nama' => ['required', 'string', 'max:255'],
+                'traditional' => ['nullable', 'integer', 'min:0'],
+                'fullbody' => ['nullable', 'integer', 'min:0'],
+                'butterfly' => ['nullable', 'integer', 'min:0'],
+                'extra_time' => ['nullable', 'integer', 'min:0'],
+                'room' => ['nullable', 'string', 'max:255'],
+            ];
+        }
+
         return [
             'tanggal' => ['required', 'date'],
             'waktu' => ['nullable', 'date_format:H:i'],

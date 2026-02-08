@@ -6,3 +6,13 @@
   0% { opacity: 0; transform: translateY(-6px); }
   100% { opacity: 1; transform: translateY(0); }
 }
+
+.table-head-divider thead th + th {
+  border-left: 1px solid #eadfce;
+  padding-left: 12px;
+}
+
+.table-head-divider th,
+.table-head-divider td {
+  padding-right: 12px;
+}

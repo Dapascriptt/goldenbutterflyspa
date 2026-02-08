@@ -76,7 +76,7 @@
         </form>
 
         <div class="mt-6 overflow-x-auto">
-            <table class="w-full text-sm min-w-[1400px]">
+            <table class="w-full text-sm min-w-[1400px] table-head-divider">
                 <thead>
                     <tr class="text-left text-slate-500 border-b border-[#eadfce]">
                         <th class="py-3 whitespace-nowrap">Tanggal</th>
@@ -94,7 +94,7 @@
                         <th class="py-3 whitespace-nowrap">Room Charge (Rp)</th>
                         <th class="py-3 whitespace-nowrap">Total Charge (Rp)</th>
                         <th class="py-3 whitespace-nowrap">Room</th>
-                        <th class="py-3 text-right whitespace-nowrap">Aksi</th>
+                        <th class="py-3 text-center whitespace-nowrap">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -115,8 +115,8 @@
                             <td class="py-2 whitespace-nowrap">{{ $fmt($row->room_charge) }}</td>
                             <td class="py-2 whitespace-nowrap font-semibold text-[#4b2f1a]">{{ $fmt($row->total_charge) }}</td>
                             <td class="py-2 whitespace-nowrap">{{ $row->room ?? '-' }}</td>
-                            <td class="py-2 text-right">
-                                <div class="flex justify-end gap-2">
+                            <td class="py-2 text-center">
+                                <div class="flex justify-center gap-2">
                                     <a href="{{ route('manage.therapist.edit', $row->id) }}" class="px-3 py-1 rounded-lg border border-[#9c7a4c] text-[#9c7a4c] text-xs font-semibold">
                                         Edit
                                     </a>

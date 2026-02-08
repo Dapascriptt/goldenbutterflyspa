@@ -60,7 +60,7 @@
                 $units = ['Bungkus', 'Pack', 'Ball', 'Dus', 'Kaleng', 'Botol', 'Kotak', 'Jerigen'];
             @endphp
             <div class="mt-6 overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm table-head-divider">
                 <thead>
                     <tr class="text-left text-slate-500 border-b border-[#eadfce]">
                         <th class="py-3">Nama Item</th>
@@ -68,7 +68,7 @@
                         <th class="py-3">Stok Awal</th>
                         <th class="py-3">Stok Akhir</th>
                         <th class="py-3">Tanggal Input</th>
-                        <th class="py-3 text-right">Aksi</th>
+                        <th class="py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -85,8 +85,8 @@
                             <td class="py-3">{{ $stockAwal }}</td>
                             <td class="py-3">{{ $stockAkhir }}</td>
                             <td class="py-3">{{ $tanggalInput }}</td>
-                            <td class="py-3 text-right">
-                                <div class="flex flex-wrap justify-end gap-2">
+                            <td class="py-3 text-center">
+                                <div class="flex flex-wrap justify-center gap-2">
                                     <button
                                         type="button"
                                         @click="selected = @js(['id' => $item->id, 'name' => $item->name, 'unit' => $item->unit, 'stock_awal' => $stockAwal]); showIn = true"
