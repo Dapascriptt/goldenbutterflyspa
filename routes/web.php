@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\Manage\InventoryController;
 use App\Http\Controllers\Manage\OmsetController;
 use App\Http\Controllers\Manage\TherapistController;
+use App\Http\Controllers\Manage\TherapistNameController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -15,6 +16,9 @@ Route::get('/', function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/archives', [ArchiveController::class, 'index'])->name('archives.index');
+    Route::post('/archives/archive-now', [ArchiveController::class, 'archiveNow'])->name('archives.archive');
+    Route::get('/archives/export', [ArchiveController::class, 'export'])->name('archives.export');
 
     Route::prefix('manage')->group(function () {
         Route::prefix('omset')->name('manage.omset.')->group(function () {
@@ -38,8 +42,11 @@ Route::middleware('auth')->group(function () {
         Route::prefix('therapist')->name('manage.therapist.')->group(function () {
             Route::get('/', [TherapistController::class, 'index'])->name('index');
             Route::get('/summary', [TherapistController::class, 'summary'])->name('summary');
+            Route::get('/monthly', [TherapistController::class, 'monthly'])->name('monthly');
             Route::get('/create', [TherapistController::class, 'create'])->name('create');
             Route::post('/', [TherapistController::class, 'store'])->middleware('no-admin-write')->name('store');
+            Route::post('/names', [TherapistNameController::class, 'store'])->middleware('no-admin-write')->name('names.store');
+            Route::delete('/names/{id}', [TherapistNameController::class, 'destroy'])->middleware('no-admin-write')->name('names.destroy');
             Route::get('/{id}/edit', [TherapistController::class, 'edit'])->name('edit');
             Route::put('/{id}', [TherapistController::class, 'update'])->middleware('no-admin-write')->name('update');
             Route::delete('/{id}', [TherapistController::class, 'destroy'])->middleware('no-admin-write')->name('destroy');
@@ -81,17 +88,6 @@ Route::middleware('auth')->group(function () {
                 ->name('print');
         });
     });
-
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    Route::get('/reports/export/excel', [ReportController::class, 'exportExcel'])
-        ->middleware('role:admin')
-        ->name('reports.export.excel');
-    Route::get('/reports/export/pdf', [ReportController::class, 'exportPdf'])
-        ->middleware('role:admin')
-        ->name('reports.export.pdf');
-    Route::get('/reports/print', [ReportController::class, 'print'])
-        ->middleware('role:admin')
-        ->name('reports.print');
 
     Route::get('/exports', [ExportController::class, 'index'])
         ->middleware('role:admin')

@@ -80,6 +80,12 @@
                                     Summary Therapist
                                 </span>
                             </a>
+                            <a href="{{ route('manage.therapist.monthly') }}" class="block text-sm hover:text-[#4b2f1a] {{ request()->routeIs('manage.therapist.monthly') ? 'text-[#4b2f1a] font-semibold' : 'text-slate-500' }}">
+                                <span class="inline-flex items-center gap-2">
+                                    <span class="h-2.5 w-2.5 rounded-full bg-[#a39178]"></span>
+                                    Monthly Thera Result
+                                </span>
+                            </a>
                         </div>
                     </details>
                     <a href="{{ route('manage.inventory.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-[#f7f2eb]">
@@ -90,35 +96,37 @@
                         </span>
                         Inventory
                     </a>
-                    <a href="{{ route('reports.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-[#f7f2eb]">
+                    <a href="{{ route('archives.index') }}" class="mt-2 flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium hover:bg-[#f7f2eb]">
                         <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-[#f7f2eb] text-[#9c7a4c]">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4h10l6 6v10H4zM14 4v6h6" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16v12H4zM8 6V4h8v2M7 10h10M7 14h10" />
                             </svg>
                         </span>
-                        Reports
+                        Arsip
                     </a>
                 </nav>
             </aside>
 
             <div class="flex-1 transition-all duration-200" :class="sidebarOpen ? 'md:pl-64' : 'md:pl-0'">
-                <button
-                    type="button"
-                    class="fixed z-30 left-4 top-4 inline-flex items-center justify-center w-10 h-10 rounded-lg border border-[#eadfce] bg-white text-[#9c7a4c] shadow-sm hover:bg-[#f7f2eb]"
-                    @click="sidebarOpen = true"
-                    x-show="!sidebarOpen"
-                    x-transition.opacity
-                    aria-label="Open sidebar"
-                >
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
                 <header class="bg-white border-b border-[#eadfce]">
                     <div class="flex flex-col gap-3 px-6 py-4 md:flex-row md:items-center md:justify-between">
-                        <div>
-                            <h1 class="text-xl font-semibold text-[#4b2f1a]">@yield('page_title', 'Dashboard')</h1>
-                            <p class="text-sm text-slate-500">Sistem manajemen Golden Spa</p>
+                        <div class="flex items-start gap-3">
+                            <button
+                                type="button"
+                                class="mt-1 inline-flex items-center justify-center w-10 h-10 rounded-lg border border-[#eadfce] bg-white text-[#9c7a4c] shadow-sm hover:bg-[#f7f2eb]"
+                                @click="sidebarOpen = true"
+                                x-show="!sidebarOpen"
+                                x-transition.opacity
+                                aria-label="Open sidebar"
+                            >
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            <div class="flex flex-col">
+                                <h1 class="text-xl font-semibold text-[#4b2f1a] leading-tight">@yield('page_title', 'Dashboard')</h1>
+                                <p class="text-sm text-slate-500">Sistem manajemen Golden Spa</p>
+                            </div>
                         </div>
                         <div class="flex items-center gap-3">
                             @auth
@@ -145,11 +153,17 @@
 
                     @yield('content')
                 </main>
+                <footer class="border-t border-[#eadfce] bg-white">
+                    <div class="px-6 py-4 text-center text-xs text-slate-500">
+                        © {{ date('Y') }} Golden Butterfly Spa. All rights reserved.
+                    </div>
+                </footer>
             </div>
         </div>
         @stack('scripts')
         <script>
         document.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.add('loaded');
             document.querySelectorAll('form[data-confirm]').forEach((form) => {
                 form.addEventListener('submit', (event) => {
                     event.preventDefault();

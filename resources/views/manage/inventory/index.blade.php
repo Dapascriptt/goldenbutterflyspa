@@ -59,7 +59,8 @@
             @php
                 $units = ['Bungkus', 'Pack', 'Ball', 'Dus', 'Kaleng', 'Botol', 'Kotak', 'Jerigen'];
             @endphp
-            <div class="mt-6 overflow-x-auto">
+            <div class="mt-6 overflow-x-auto relative">
+                <div class="skeleton-overlay"></div>
                 <table class="w-full text-sm table-head-divider">
                 <thead>
                     <tr class="text-left text-slate-500 border-b border-[#eadfce]">

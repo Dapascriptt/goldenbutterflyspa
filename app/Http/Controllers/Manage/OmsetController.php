@@ -8,6 +8,7 @@ use App\Http\Requests\OmsetIndexRequest;
 use App\Http\Requests\OmsetStoreRequest;
 use App\Http\Requests\OmsetUpdateRequest;
 use App\Models\Omset;
+use App\Models\TherapistCharge;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -48,6 +49,8 @@ class OmsetController extends Controller
                 ->appends($request->query());
         }
 
+        [$chartRange, $chartData] = $this->buildOmsetCharts($request);
+
         return view('manage.omset.index', [
             'rows' => $rows,
             'filters' => [
@@ -55,6 +58,8 @@ class OmsetController extends Controller
                 'date_to' => $dateTo,
                 'q' => $search,
             ],
+            'chartRange' => $chartRange,
+            'chartData' => $chartData,
         ]);
     }
 
@@ -184,5 +189,85 @@ class OmsetController extends Controller
             'title' => 'Laporan Omset',
             'rows' => OmsetExport::dummyRows(),
         ]);
+    }
+
+    private function buildOmsetCharts(OmsetIndexRequest $request): array
+    {
+        $filter = (string) $request->input('filter', 'month');
+
+        $now = Carbon::now();
+        $month = (int) $request->input('month', $now->month);
+        $year = (int) $request->input('year', $now->year);
+        $date = $request->input('date');
+        $startDate = $request->input('start_date');
+
+        if ($filter === 'day') {
+            $start = $date ? Carbon::parse($date)->startOfDay() : $now->startOfDay();
+            $end = (clone $start)->endOfDay();
+            $label = $start->format('d M Y');
+        } elseif ($filter === 'ten_days') {
+            $start = $startDate ? Carbon::parse($startDate)->startOfDay() : $now->startOfDay();
+            $end = (clone $start)->addDays(9)->endOfDay();
+            $label = $start->format('d M Y').' - '.$end->format('d M Y');
+        } else {
+            $start = Carbon::create($year, $month, 1)->startOfDay();
+            $end = (clone $start)->endOfMonth()->endOfDay();
+            $label = $start->translatedFormat('F Y');
+        }
+
+        $empty = [
+            'line' => ['labels' => [], 'data' => []],
+            'donut' => ['labels' => [], 'data' => []],
+        ];
+
+        if (!Schema::hasTable('therapist_charges')) {
+            return [
+                ['label' => $label, 'filter' => $filter, 'start' => $start->toDateString(), 'end' => $end->toDateString()],
+                $empty,
+            ];
+        }
+
+        $lineRows = TherapistCharge::query()
+            ->selectRaw('date, SUM(total_charge) as total')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        $lineLabels = $lineRows->map(fn ($row) => Carbon::parse($row->date)->format('d/m'))->all();
+        $lineData = $lineRows->map(fn ($row) => (int) $row->total)->all();
+
+        $donutRows = TherapistCharge::query()
+            ->selectRaw('therapist_name, SUM(total_charge) as total')
+            ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->groupBy('therapist_name')
+            ->orderByDesc('total')
+            ->get();
+
+        $donutLabels = [];
+        $donutData = [];
+        $otherTotal = 0;
+
+        foreach ($donutRows as $index => $row) {
+            if ($index < 8) {
+                $donutLabels[] = $row->therapist_name;
+                $donutData[] = (int) $row->total;
+            } else {
+                $otherTotal += (int) $row->total;
+            }
+        }
+
+        if ($otherTotal > 0) {
+            $donutLabels[] = 'Lainnya';
+            $donutData[] = $otherTotal;
+        }
+
+        return [
+            ['label' => $label, 'filter' => $filter, 'start' => $start->toDateString(), 'end' => $end->toDateString()],
+            [
+                'line' => ['labels' => $lineLabels, 'data' => $lineData],
+                'donut' => ['labels' => $donutLabels, 'data' => $donutData],
+            ],
+        ];
     }
 }

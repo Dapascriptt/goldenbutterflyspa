@@ -4,7 +4,7 @@
 @section('page_title', 'Add Therapist')
 
 @section('content')
-    <div class="rounded-2xl bg-white border border-[#eadfce] p-6">
+    <div class="rounded-2xl bg-white border border-[#eadfce] p-6" x-data="therapistRow()">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-lg font-semibold text-[#4b2f1a]">Input Therapist</h2>
@@ -15,7 +15,7 @@
             </a>
         </div>
 
-        <form method="POST" action="{{ route('manage.therapist.store') }}" class="mt-6" x-data="therapistRow()">
+        <form method="POST" action="{{ route('manage.therapist.store') }}" class="mt-6">
             @csrf
             <div class="grid gap-4 md:grid-cols-2">
                 <div>
@@ -28,7 +28,17 @@
                 </div>
                 <div>
                     <label class="text-sm font-medium text-slate-600">Nama Therapist</label>
-                    <input type="text" name="nama" class="mt-1 w-full rounded-lg border-[#eadfce]" placeholder="Nama therapist">
+                    <div class="mt-1 flex items-center gap-2">
+                        <select name="nama" class="w-full rounded-lg border-[#eadfce]">
+                            <option value="">Pilih therapist</option>
+                            @foreach ($therapistNames as $therapist)
+                                <option value="{{ $therapist->name }}">{{ $therapist->name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="button" class="px-3 py-2 rounded-lg border border-[#eadfce] text-sm text-[#9c7a4c]" @click="showNameModal = true">
+                            + Nama
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="text-sm font-medium text-slate-600">Room</label>
@@ -82,11 +92,58 @@
                 </button>
             </div>
         </form>
+
+        <template x-if="showNameModal">
+            <div class="fixed inset-0 z-50 flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/40" @click="showNameModal = false"></div>
+                <div class="relative w-full max-w-md rounded-2xl bg-white border border-[#eadfce] p-6 shadow-xl">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <h3 class="text-lg font-semibold text-[#4b2f1a]">Tambah Nama Therapist</h3>
+                            <p class="text-sm text-slate-500">Nama akan muncul di dropdown.</p>
+                        </div>
+                        <button type="button" class="h-9 w-9 rounded-lg border border-[#eadfce] text-[#9c7a4c]" @click="showNameModal = false">✕</button>
+                    </div>
+                    <form method="POST" action="{{ route('manage.therapist.names.store') }}" class="mt-5 space-y-4">
+                        @csrf
+                        <input type="hidden" name="redirect" value="create">
+                        <div>
+                            <label class="text-sm font-medium text-slate-600">Nama</label>
+                            <input type="text" name="name" class="mt-1 w-full rounded-lg border-[#eadfce]" required>
+                        </div>
+                        <div class="rounded-lg border border-[#eadfce] p-3">
+                            <div class="text-xs font-semibold text-slate-500 mb-2">Daftar Nama</div>
+                            <div class="max-h-48 overflow-y-auto space-y-2">
+                                @forelse ($therapistNames as $therapist)
+                                    <div class="flex items-center justify-between gap-2 rounded-lg border border-[#f1e7d8] px-3 py-2">
+                                        <span class="text-sm">{{ $therapist->name }}</span>
+                                        <form method="POST" action="{{ route('manage.therapist.names.destroy', $therapist->id) }}" data-confirm>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-2 py-1 rounded-md border border-red-200 text-red-600 text-xs font-semibold">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @empty
+                                    <div class="text-sm text-slate-400">Belum ada nama.</div>
+                                @endforelse
+                            </div>
+                        </div>
+                        <div class="flex justify-end gap-2">
+                            <button type="button" class="px-4 py-2 rounded-lg border border-[#eadfce] text-sm" @click="showNameModal = false">Batal</button>
+                            <button type="submit" class="px-4 py-2 rounded-lg bg-[#9c7a4c] text-white text-sm">Simpan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </template>
     </div>
 
     <script>
         function therapistRow() {
             return {
+                showNameModal: false,
                 extraTime: 0,
                 traditional: 0,
                 fullbody: 0,

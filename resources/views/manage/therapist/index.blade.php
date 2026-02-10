@@ -20,13 +20,13 @@
                     </a>
                 @endif
                 @if (auth()->user()->isAdmin())
-                    <a href="{{ route('manage.therapist.export.excel') }}" class="px-3 py-2 rounded-lg bg-[#f7f2eb] text-[#9c7a4c] text-xs font-semibold border border-[#eadfce]">
+                    <a href="{{ route('manage.therapist.export.excel', request()->only(['filter', 'month', 'year', 'date', 'start_date'])) }}" class="px-3 py-2 rounded-lg bg-[#f7f2eb] text-[#9c7a4c] text-xs font-semibold border border-[#eadfce]">
                         Export Excel
                     </a>
-                    <a href="{{ route('manage.therapist.export.pdf') }}" class="px-3 py-2 rounded-lg bg-[#4b2f1a] text-white text-xs font-semibold">
+                    <a href="{{ route('manage.therapist.export.pdf', request()->only(['filter', 'month', 'year', 'date', 'start_date'])) }}" class="px-3 py-2 rounded-lg bg-[#4b2f1a] text-white text-xs font-semibold">
                         Export PDF
                     </a>
-                    <a href="{{ route('manage.therapist.print') }}" class="px-3 py-2 rounded-lg border border-[#9c7a4c] text-[#9c7a4c] text-xs font-semibold">
+                    <a href="{{ route('manage.therapist.print', request()->only(['filter', 'month', 'year', 'date', 'start_date'])) }}" class="px-3 py-2 rounded-lg border border-[#9c7a4c] text-[#9c7a4c] text-xs font-semibold">
                         Print A4
                     </a>
                 @endif
@@ -75,7 +75,8 @@
             </button>
         </form>
 
-        <div class="mt-6 overflow-x-auto">
+        <div class="mt-6 overflow-x-auto relative">
+            <div class="skeleton-overlay"></div>
             <table class="w-full text-sm min-w-[1400px] table-head-divider">
                 <thead>
                     <tr class="text-left text-slate-500 border-b border-[#eadfce]">

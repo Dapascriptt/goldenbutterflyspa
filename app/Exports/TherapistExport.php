@@ -8,22 +8,19 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class TherapistExport implements FromCollection, WithHeadings
 {
+    public function __construct(
+        protected Collection $rows,
+        protected array $headings
+    ) {
+    }
+
     public function collection(): Collection
     {
-        return collect(self::dummyRows());
+        return $this->rows;
     }
 
     public function headings(): array
     {
-        return ['ID', 'Nama', 'Spesialisasi', 'Status'];
-    }
-
-    public static function dummyRows(): array
-    {
-        return [
-            [1, 'Therapist A', 'Massage', 'Aktif'],
-            [2, 'Therapist B', 'Reflexology', 'Aktif'],
-            [3, 'Therapist C', 'Spa', 'Nonaktif'],
-        ];
+        return $this->headings;
     }
 }
